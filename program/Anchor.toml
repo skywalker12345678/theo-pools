@@ -1,0 +1,19 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+theo_commitment_pool = "9ApgY5PU4canp14F1s14vosTSgxKiQeZfvweJGcbEQ6J"
+
+[programs.testnet]
+theo_commitment_pool = "9ApgY5PU4canp14F1s14vosTSgxKiQeZfvweJGcbEQ6J"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[toolchain]
+anchor_version = "0.32.1"

@@ -1,0 +1,19 @@
+# Rust/Anchor
+program/target/
+program/.anchor/
+program/test-ledger/
+
+# Node
+bot/node_modules/
+bot/dist/
+app/node_modules/
+app/.next/
+app/out/
+
+# Secrets — NEVER commit these
+.env
+**/.env
+*keypair*.json
+*id.json
+wallet*.json
+*.key

@@ -1,0 +1,20 @@
+{
+  "name": "theo-commitment-pool",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "ANCHOR_PROVIDER_URL=http://127.0.0.1:8899 ANCHOR_WALLET=~/.config/solana/id.json anchor deploy && mocha -r ts-node/register -t 1000000 tests/**/*.ts"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.4.14"
+  }
+}
