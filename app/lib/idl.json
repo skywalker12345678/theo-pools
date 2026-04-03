@@ -1,0 +1,1834 @@
+{
+  "address": "9ApgY5PU4canp14F1s14vosTSgxKiQeZfvweJGcbEQ6J",
+  "metadata": {
+    "name": "theo_commitment_pool",
+    "version": "0.1.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "claim",
+      "discriminator": [
+        62,
+        198,
+        214,
+        193,
+        213,
+        159,
+        108,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "player",
+          "docs": [
+            "The survivor claiming their reward."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "docs": [
+            "The pool in Claiming state."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_position",
+          "docs": [
+            "Player's position — verified as survivor, marked claimed here."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              },
+              {
+                "kind": "account",
+                "path": "player"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "Token mint — needed for transfer_checked."
+          ]
+        },
+        {
+          "name": "player_token_account",
+          "docs": [
+            "Player's token account — destination of the reward transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_vault",
+          "docs": [
+            "Pool vault — source of the reward transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_stalled_pool",
+      "discriminator": [
+        61,
+        86,
+        193,
+        182,
+        101,
+        128,
+        181,
+        21
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "docs": [
+            "Permissionless — any wallet can close a stalled pool.",
+            "No funds at risk — this instruction only changes state."
+          ],
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "docs": [
+            "GlobalState — mutable to clear active_filling_pool."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "docs": [
+            "The stalled Filling pool to close."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "collect_redistribution",
+      "discriminator": [
+        241,
+        204,
+        31,
+        182,
+        220,
+        41,
+        149,
+        74
+      ],
+      "accounts": [
+        {
+          "name": "player",
+          "docs": [
+            "The claimer collecting their redistribution bonus."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "docs": [
+            "The Finalized pool."
+          ],
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_position",
+          "docs": [
+            "Player's position."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              },
+              {
+                "kind": "account",
+                "path": "player"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "Token mint — needed for transfer_checked."
+          ]
+        },
+        {
+          "name": "player_token_account",
+          "docs": [
+            "Player's token account — destination of the redistribution transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_vault",
+          "docs": [
+            "Pool vault — source of the redistribution transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_pool",
+      "discriminator": [
+        233,
+        146,
+        209,
+        142,
+        207,
+        104,
+        64,
+        188
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "docs": [
+            "Permissionless — any wallet can create a pool."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "docs": [
+            "GlobalState singleton."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "docs": [
+            "The new pool PDA."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "global_state.pool_count",
+                "account": "GlobalState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "The THEO token mint."
+          ]
+        },
+        {
+          "name": "rollover_vault",
+          "docs": [
+            "Global rollover vault — source of the seed transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_vault",
+          "docs": [
+            "This pool's token vault."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "global_state.pool_count",
+                "account": "GlobalState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deposit",
+      "discriminator": [
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "player",
+          "docs": [
+            "The player joining the pool."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "docs": [
+            "GlobalState — mutable so we can clear active_filling_pool on activation."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "docs": [
+            "The Filling pool the player is joining."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_position",
+          "docs": [
+            "UserPosition PDA — initialized here. One per (player, pool)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              },
+              {
+                "kind": "account",
+                "path": "player"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "The THEO token mint. Validated against pool.token_mint."
+          ]
+        },
+        {
+          "name": "player_token_account",
+          "docs": [
+            "Player's THEO token account — source of the stake transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_vault",
+          "docs": [
+            "Pool vault — destination of the stake transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "early_exit",
+      "discriminator": [
+        57,
+        50,
+        147,
+        224,
+        231,
+        173,
+        36,
+        75
+      ],
+      "accounts": [
+        {
+          "name": "player",
+          "docs": [
+            "The player exiting early. Must be the position owner."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "docs": [
+            "The Active pool the player is exiting from."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_position",
+          "docs": [
+            "Player's position in this pool."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              },
+              {
+                "kind": "account",
+                "path": "player"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "Token mint — needed for transfer_checked."
+          ]
+        },
+        {
+          "name": "player_token_account",
+          "docs": [
+            "Player's token account — destination of the EARLY_EXIT_RETURN transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_vault",
+          "docs": [
+            "Pool vault — source of the EARLY_EXIT_RETURN transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "finalize",
+      "discriminator": [
+        171,
+        61,
+        218,
+        56,
+        127,
+        115,
+        12,
+        217
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "docs": [
+            "Permissionless — any wallet can finalize after claim_deadline."
+          ],
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "docs": [
+            "GlobalState — mutable to update rollover_balance."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "docs": [
+            "The pool being finalized."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "Token mint — needed for transfer_checked."
+          ]
+        },
+        {
+          "name": "pool_vault",
+          "docs": [
+            "Pool vault — source of the rollover transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "rollover_vault",
+          "docs": [
+            "Global rollover vault — destination of the rollover transfer."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "docs": [
+            "Deployer / authority. Pays for account initialization.",
+            "Stored in GlobalState — has no power over game mechanics."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "docs": [
+            "GlobalState singleton PDA. Init enforces one-time-only execution.",
+            "If this account already exists, Anchor rejects the instruction."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "The canonical THEO token mint for this deployment.",
+            "Stored in GlobalState — all pools and deposits validated against this."
+          ]
+        },
+        {
+          "name": "rollover_vault",
+          "docs": [
+            "Global rollover vault token account.",
+            "Owned by GlobalState PDA — only program CPIs can move funds.",
+            "Initialized here with zero balance.",
+            "Must exist before any pool creation — create_pool validates this account."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  111,
+                  108,
+                  108,
+                  111,
+                  118,
+                  101,
+                  114,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "withdraw",
+      "discriminator": [
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "player",
+          "docs": [
+            "The player withdrawing their stake."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_state",
+          "docs": [
+            "GlobalState — mutable to clear active_filling_pool and update rollover_balance."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "docs": [
+            "The Filling pool the player is withdrawing from."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_position",
+          "docs": [
+            "Player's position in this pool."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              },
+              {
+                "kind": "account",
+                "path": "player"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint",
+          "docs": [
+            "Token mint — needed for transfer_checked."
+          ]
+        },
+        {
+          "name": "player_token_account",
+          "docs": [
+            "Player's token account — destination of the returned stake."
+          ],
+          "writable": true
+        },
+        {
+          "name": "pool_vault",
+          "docs": [
+            "Pool vault — source of the stake return."
+          ],
+          "writable": true
+        },
+        {
+          "name": "rollover_vault",
+          "docs": [
+            "Global rollover vault — receives rollover_seed if pool auto-closes."
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "GlobalState",
+      "discriminator": [
+        163,
+        46,
+        74,
+        168,
+        216,
+        123,
+        133,
+        98
+      ]
+    },
+    {
+      "name": "Pool",
+      "discriminator": [
+        241,
+        154,
+        109,
+        4,
+        17,
+        177,
+        109,
+        188
+      ]
+    },
+    {
+      "name": "UserPosition",
+      "discriminator": [
+        251,
+        248,
+        209,
+        245,
+        83,
+        234,
+        17,
+        27
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ClaimWindowOpened",
+      "discriminator": [
+        182,
+        108,
+        83,
+        65,
+        81,
+        178,
+        6,
+        248
+      ]
+    },
+    {
+      "name": "EarlyExit",
+      "discriminator": [
+        189,
+        88,
+        83,
+        5,
+        164,
+        59,
+        72,
+        34
+      ]
+    },
+    {
+      "name": "FillingWithdraw",
+      "discriminator": [
+        75,
+        150,
+        51,
+        82,
+        231,
+        163,
+        44,
+        31
+      ]
+    },
+    {
+      "name": "PlayerJoined",
+      "discriminator": [
+        39,
+        144,
+        49,
+        106,
+        108,
+        210,
+        183,
+        38
+      ]
+    },
+    {
+      "name": "PoolActivated",
+      "discriminator": [
+        201,
+        79,
+        203,
+        77,
+        3,
+        105,
+        233,
+        1
+      ]
+    },
+    {
+      "name": "PoolClosed",
+      "discriminator": [
+        106,
+        46,
+        29,
+        231,
+        42,
+        44,
+        73,
+        119
+      ]
+    },
+    {
+      "name": "PoolCreated",
+      "discriminator": [
+        202,
+        44,
+        41,
+        88,
+        104,
+        220,
+        157,
+        82
+      ]
+    },
+    {
+      "name": "PoolFinalized",
+      "discriminator": [
+        11,
+        108,
+        200,
+        20,
+        59,
+        220,
+        39,
+        186
+      ]
+    },
+    {
+      "name": "RedistributionCollected",
+      "discriminator": [
+        252,
+        196,
+        91,
+        77,
+        251,
+        52,
+        37,
+        96
+      ]
+    },
+    {
+      "name": "RewardClaimed",
+      "discriminator": [
+        49,
+        28,
+        87,
+        84,
+        158,
+        48,
+        229,
+        175
+      ]
+    },
+    {
+      "name": "RolloverSeeded",
+      "discriminator": [
+        198,
+        220,
+        236,
+        127,
+        109,
+        72,
+        49,
+        128
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "PoolNotWithdrawable",
+      "msg": "Pool is not in a withdrawable state (must be Filling or Closed)."
+    },
+    {
+      "code": 6001,
+      "name": "NotActiveFillingPool",
+      "msg": "This pool is not the active filling pool."
+    },
+    {
+      "code": 6002,
+      "name": "AlreadyWithdrawn",
+      "msg": "Position has already been withdrawn."
+    },
+    {
+      "code": 6003,
+      "name": "CountUnderflow",
+      "msg": "Player count underflowed."
+    },
+    {
+      "code": 6004,
+      "name": "MathOverflow",
+      "msg": "Math overflow."
+    },
+    {
+      "code": 6005,
+      "name": "Unauthorized",
+      "msg": "Signer is not the position owner."
+    },
+    {
+      "code": 6006,
+      "name": "PositionPoolMismatch",
+      "msg": "Position does not belong to this pool."
+    }
+  ],
+  "types": [
+    {
+      "name": "ClaimWindowOpened",
+      "docs": [
+        "Emitted when a pool transitions Active → Claiming (lazy, on first claim call)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "survivor_count",
+            "type": "u8"
+          },
+          {
+            "name": "penalty_vault_balance",
+            "type": "u64"
+          },
+          {
+            "name": "reward_per_survivor",
+            "type": "u64"
+          },
+          {
+            "name": "claim_deadline",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EarlyExit",
+      "docs": [
+        "Emitted when a player exits early from an Active pool (penalized)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "returned",
+            "type": "u64"
+          },
+          {
+            "name": "penalized",
+            "type": "u64"
+          },
+          {
+            "name": "penalty_vault_total",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FillingWithdraw",
+      "docs": [
+        "Emitted when a player withdraws during the Filling phase (no penalty).",
+        "pool_closed = true if this was the last player and the pool auto-closed."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "pool_closed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GlobalState",
+      "docs": [
+        "Singleton PDA. One per program deployment.",
+        "Tracks the global rollover vault and pool counter.",
+        "",
+        "PDA seeds: [\"global\"]"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "Authority that can manage the protocol."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint",
+            "docs": [
+              "The canonical THEO token mint for this deployment.",
+              "All pools must use this mint. Validated at pool creation and deposit."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "rollover_vault",
+            "docs": [
+              "Token account PDA holding global rollover vault funds.",
+              "Seeded into the next pool created."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "rollover_balance",
+            "docs": [
+              "Running balance of tokens in the global rollover vault (raw units)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "pool_count",
+            "docs": [
+              "Total number of pools ever created (monotonically increasing).",
+              "Used as the next pool_id on creation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "active_filling_pool",
+            "docs": [
+              "The pool_id of the currently open Filling pool, if any.",
+              "Set when a new pool is created. Cleared when pool goes Active or Closed.",
+              "Enforces the single-filling-pool-at-a-time invariant on-chain."
+            ],
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump for [\"global\"]"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "_reserved",
+            "docs": [
+              "Reserved for future fields without account migration.",
+              "Note: Option<u64> consumes 9 bytes, token_mint Pubkey consumes 32 bytes."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                23
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlayerJoined",
+      "docs": [
+        "Emitted when a player joins a Filling pool."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "player_count",
+            "type": "u8"
+          },
+          {
+            "name": "fill_deadline",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Pool",
+      "docs": [
+        "One PDA per pool. Pools are disposable; the program is permanent.",
+        "",
+        "PDA seeds: [\"pool\", id.to_le_bytes()]"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "docs": [
+              "Monotonic pool identifier (0-indexed)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "token_mint",
+            "docs": [
+              "The THEO token mint this pool accepts."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "docs": [
+              "Token account PDA holding this pool's staked funds."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "player_count",
+            "docs": [
+              "Number of players who have joined (and not withdrawn during Filling)."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "survivor_count",
+            "docs": [
+              "Number of players who have not exited early.",
+              "Decrements on each early_exit(). Used for floor(P / W) at claim time."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "penalty_vault_balance",
+            "docs": [
+              "Accumulated penalty tokens from early exits (raw units)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fill_deadline",
+            "docs": [
+              "Deadline by which the pool must reach MAX_PLAYERS.",
+              "Resets to now + FILL_TIMEOUT on every new join. Zero until first join."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "start_time",
+            "docs": [
+              "Unix timestamp when the pool transitioned to Active."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "docs": [
+              "Unix timestamp when the 90-day lock expires (= start_time + GAME_DURATION)."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "claim_deadline",
+            "docs": [
+              "Unix timestamp when the claim window closes (= end_time + CLAIM_WINDOW)."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Current lifecycle state."
+            ],
+            "type": {
+              "defined": {
+                "name": "PoolStatus"
+              }
+            }
+          },
+          {
+            "name": "rollover_seed",
+            "docs": [
+              "Rollover seed transferred from GlobalState when this pool was created.",
+              "Tracked separately to allow recovery if pool stalls (rule 6B)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "reward_per_survivor",
+            "docs": [
+              "Penalty share per survivor = floor(penalty_vault_balance / survivor_count).",
+              "Computed when pool enters Claiming. Frozen for all subsequent claims.",
+              "Full claim amount = STAKE_AMOUNT + reward_per_survivor.",
+              "claimed_total tracks penalty payouts only (not stake principal)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "claimed_count",
+            "docs": [
+              "Number of survivors who have successfully claimed.",
+              "Used at finalization to compute unclaimed redistribution."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "claimed_total",
+            "docs": [
+              "Total tokens paid out to claimers so far."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "redistribution_per_claimer",
+            "docs": [
+              "Per-claimer redistribution amount computed at finalize time.",
+              "= floor((penalty_vault_balance - (claimed_count * reward_per_survivor)) / claimed_count)",
+              "Survivors who claimed call collect_redistribution() to pull this amount."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "redistribution_dust",
+            "docs": [
+              "Floor division dust from redistribution calculation.",
+              "= (penalty_vault_balance - (claimed_count * reward_per_survivor)) % claimed_count",
+              "Rolled into GlobalState.rollover_balance at finalize time. Never silently lost."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "finalized",
+            "docs": [
+              "Set true after finalize() computes redistribution_per_claimer and redistribution_dust.",
+              "Guards against double-finalization. Must be the first require! check in finalize()."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump for [\"pool\", id.to_le_bytes()]"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolActivated",
+      "docs": [
+        "Emitted when a pool transitions Filling → Active (10th player joins)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolClosed",
+      "docs": [
+        "Emitted when a stalled Filling pool is closed.",
+        "Via close_stalled_pool: rollover_returned = 0 (no tokens moved).",
+        "Via withdraw (last player): rollover_returned = rollover_seed (tokens returned)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "rollover_returned",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolCreated",
+      "docs": [
+        "Emitted when a new pool is created."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "rollover_seed",
+            "type": "u64"
+          },
+          {
+            "name": "fill_deadline",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolFinalized",
+      "docs": [
+        "Emitted when a pool is finalized after the claim window closes."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "claimed_count",
+            "type": "u8"
+          },
+          {
+            "name": "redistribution_per_claimer",
+            "type": "u64"
+          },
+          {
+            "name": "redistribution_dust",
+            "type": "u64"
+          },
+          {
+            "name": "rolled_over",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolStatus",
+      "docs": [
+        "Strict one-directional lifecycle:",
+        "Filling → Active → Claiming → Finalized",
+        "A stalled Filling pool is closed on last withdrawal (never reaches Active)."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Filling"
+          },
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Claiming"
+          },
+          {
+            "name": "Finalized"
+          },
+          {
+            "name": "Closed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RedistributionCollected",
+      "docs": [
+        "Emitted when a survivor collects their redistribution bonus after finalization."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RewardClaimed",
+      "docs": [
+        "Emitted when a survivor successfully claims their base reward.",
+        "amount = STAKE_AMOUNT + reward_per_survivor (penalty share)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RolloverSeeded",
+      "docs": [
+        "Defined but not currently emitted — rollover info carried by PoolCreated."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserPosition",
+      "docs": [
+        "One PDA per (player, pool) pair.",
+        "",
+        "PDA seeds: [\"position\", pool_id.to_le_bytes(), owner.as_ref()]"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "docs": [
+              "The player's wallet pubkey."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "pool",
+            "docs": [
+              "The pool PDA this position belongs to."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "pool_id",
+            "docs": [
+              "The pool's numeric ID. Stored for cheap off-chain queries and event logging."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "docs": [
+              "Amount deposited. Always STAKE_AMOUNT (0.20 THEO = 20 raw units)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "deposited_at",
+            "docs": [
+              "Unix timestamp of deposit."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "withdrew_filling",
+            "docs": [
+              "True if the player withdrew during the Filling phase (no penalty).",
+              "Distinct from exited_early — that flag is strictly for Active-phase exits."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "exited_early",
+            "docs": [
+              "True if the player called early_exit() during the Active window.",
+              "Single source of truth for exit state."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "claimed",
+            "docs": [
+              "True if the survivor successfully called claim() during the claim window."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "redistribution_collected",
+            "docs": [
+              "True if the survivor has collected their redistribution bonus via collect_redistribution().",
+              "Separate from claimed — redistribution is a second pull after finalize()."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump for [\"position\", pool_id.to_le_bytes(), owner.as_ref()]"
+            ],
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}
