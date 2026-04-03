@@ -18,8 +18,11 @@ export function StakePosition({ position, onRefresh }: StakePositionProps) {
 
   const now = Math.floor(Date.now() / 1000);
   const gameEnded = position.lockupEnds ? now > position.lockupEnds : false;
+  const claimWindowEnd = position.lockupEnds ? position.lockupEnds + 5 * 24 * 60 * 60 : 0;
+  const claimWindowClosed = claimWindowEnd > 0 && now > claimWindowEnd;
   const canExit = !position.exitedEarly && !position.claimed && !gameEnded;
-  const canClaim = !position.claimed && gameEnded && !position.exitedEarly;
+  const canClaim = !position.claimed && !position.exitedEarly && gameEnded && !claimWindowClosed;
+  const rolledOver = !position.claimed && !position.exitedEarly && gameEnded && claimWindowClosed;
 
   async function handleExit() {
     if (!publicKey) return;
@@ -55,6 +58,17 @@ export function StakePosition({ position, onRefresh }: StakePositionProps) {
     }
   }
 
+  // Status badge
+  const badge = position.claimed
+    ? { label: "✓ Claimed", color: "var(--success)", bg: "rgba(46,204,113,0.1)", border: "rgba(46,204,113,0.3)" }
+    : position.exitedEarly
+    ? { label: "Exited Early", color: "var(--danger)", bg: "rgba(231,76,60,0.1)", border: "rgba(231,76,60,0.3)" }
+    : rolledOver
+    ? { label: "🔄 Rolled Over", color: "var(--text-muted)", bg: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.1)" }
+    : gameEnded
+    ? { label: "🏆 Survivor! Claim Now!", color: "var(--success)", bg: "rgba(46,204,113,0.1)", border: "rgba(46,204,113,0.3)" }
+    : { label: "🟡 Active", color: "var(--accent)", bg: "rgba(252,163,17,0.1)", border: "rgba(252,163,17,0.3)" };
+
   return (
     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius)", padding: 20 }}>
       {/* Header */}
@@ -65,27 +79,30 @@ export function StakePosition({ position, onRefresh }: StakePositionProps) {
             Joined {new Date(position.entryTimestamp * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </p>
         </div>
-        {/* Status badge */}
-        {position.claimed && (
-          <span style={{ padding: "4px 10px", background: "rgba(46,204,113,0.1)", border: "1px solid rgba(46,204,113,0.3)", borderRadius: 20, fontSize: 11, color: "var(--success)", fontWeight: 700 }}>✓ Claimed</span>
-        )}
-        {position.exitedEarly && (
-          <span style={{ padding: "4px 10px", background: "rgba(231,76,60,0.1)", border: "1px solid rgba(231,76,60,0.3)", borderRadius: 20, fontSize: 11, color: "var(--danger)", fontWeight: 700 }}>Exited Early</span>
-        )}
-        {!position.exitedEarly && !position.claimed && !gameEnded && (
-          <span style={{ padding: "4px 10px", background: "rgba(252,163,17,0.1)", border: "1px solid rgba(252,163,17,0.3)", borderRadius: 20, fontSize: 11, color: "var(--accent)", fontWeight: 700 }}>🟡 Active</span>
-        )}
-        {!position.exitedEarly && !position.claimed && gameEnded && (
-          <span style={{ padding: "4px 10px", background: "rgba(46,204,113,0.1)", border: "1px solid rgba(46,204,113,0.3)", borderRadius: 20, fontSize: 11, color: "var(--success)", fontWeight: 700 }}>🏆 Survivor!</span>
-        )}
+        <span style={{ padding: "4px 10px", background: badge.bg, border: `1px solid ${badge.border}`, borderRadius: 20, fontSize: 11, color: badge.color, fontWeight: 700 }}>{badge.label}</span>
       </div>
 
       {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
         <StatBox label="Staked" value="0.20" unit="THEO" />
-        <StatBox label="Claimable" value={position.claimableRewards.toFixed(4)} unit="THEO" accent />
-        <StatBox label="Game Ends" value={position.lockupEnds ? new Date(position.lockupEnds * 1000).toLocaleDateString() : "—"} unit="" />
+        {!rolledOver && !position.exitedEarly && (
+          <StatBox label="Claimable" value={position.claimableRewards.toFixed(4)} unit="THEO" accent />
+        )}
+        {rolledOver && (
+          <div style={{ padding: "12px 14px", background: "var(--bg-secondary)", borderRadius: "var(--radius-sm)", gridColumn: "span 1" }}>
+            <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Status</div>
+            <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Seeded next pool</div>
+          </div>
+        )}
+        <StatBox label="Game Ended" value={position.lockupEnds ? new Date(position.lockupEnds * 1000).toLocaleDateString() : "—"} unit="" />
       </div>
+
+      {/* Rolled over explanation */}
+      {rolledOver && (
+        <div style={{ padding: "10px 14px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "var(--radius-sm)", fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+          ℹ️ The claim window closed. Your rewards rolled over to seed the next pool. This is how the game works — attention is rewarded.
+        </div>
+      )}
 
       {/* Message */}
       {message && (
@@ -103,14 +120,14 @@ export function StakePosition({ position, onRefresh }: StakePositionProps) {
         )}
         {canClaim && (
           <button className="btn btn-primary" onClick={handleClaim} disabled={claiming} style={{ flex: 1, fontSize: 13 }}>
-            {claiming ? <><span className="spinner" /> Claiming…</> : `🏆 Claim Rewards`}
+            {claiming ? <><span className="spinner" /> Claiming…</> : "🏆 Claim Rewards"}
           </button>
         )}
         {position.claimed && (
-          <div style={{ flex: 1, textAlign: "center", padding: "10px", color: "var(--success)", fontSize: 13, fontWeight: 600 }}>✓ Rewards claimed!</div>
+          <div style={{ flex: 1, textAlign: "center", padding: "10px", color: "var(--success)", fontSize: 13, fontWeight: 600 }}>✓ Rewards successfully claimed!</div>
         )}
         {position.exitedEarly && (
-          <div style={{ flex: 1, textAlign: "center", padding: "10px", color: "var(--text-muted)", fontSize: 13 }}>Exited — 50% returned</div>
+          <div style={{ flex: 1, textAlign: "center", padding: "10px", color: "var(--text-muted)", fontSize: 13 }}>Exited early — 50% was returned to your wallet</div>
         )}
       </div>
     </div>
