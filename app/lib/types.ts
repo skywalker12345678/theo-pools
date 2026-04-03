@@ -1,30 +1,40 @@
+export type PoolStatus = "Filling" | "Active" | "Claiming" | "Finalized" | "Closed";
+
 export interface Pool {
-  id: string;
+  id: string;          // numeric pool id as string e.g. "3"
   name: string;
   description: string;
-  tvl: number; // Total Value Locked in XNT
-  apr: number; // Annual Percentage Rate (%)
-  minStake: number; // Minimum stake in XNT
-  maxStake: number; // Maximum stake in XNT
+  tvl: number;         // raw units / 100 for display
+  apr: number;
+  minStake: number;    // 0.20 THEO
+  maxStake: number;
   playerCount: number;
+  survivorCount: number;
+  penaltyVaultBalance: number;
   isActive: boolean;
-  createdAt: number; // Unix timestamp
-  // On-chain fields (populated from getPoolState)
+  status: PoolStatus;
+  createdAt: number;
+  startTime: number;
+  endTime: number;
+  claimDeadline: number;
+  rewardPerSurvivor: number;
   poolAuthority?: string;
-  rewardMint?: string;
   stakeMint?: string;
 }
 
 export interface UserPosition {
   poolId: string;
   poolName: string;
-  stakedAmount: number; // in XNT
-  claimableRewards: number; // in XNT
-  entryTimestamp: number; // Unix timestamp
-  lockupEnds?: number; // Unix timestamp, if applicable
+  stakedAmount: number;
+  claimableRewards: number;
+  entryTimestamp: number;
+  exitedEarly: boolean;
+  claimed: boolean;
+  redistributionCollected: boolean;
+  lockupEnds?: number;
 }
 
 export interface JoinPoolParams {
   poolId: string;
-  amount: number; // in XNT
+  amount: number;
 }
