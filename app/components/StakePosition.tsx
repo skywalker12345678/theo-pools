@@ -49,7 +49,7 @@ export function StakePosition({ position, onRefresh }: StakePositionProps) {
       await connection.confirmTransaction(sig, "confirmed");
       setMessage({
         type: "success",
-        text: `Claimed ${position.claimableRewards.toFixed(4)} XNT`,
+        text: `Claimed ${position.claimableRewards.toFixed(4)} THEO`,
       });
       onRefresh?.();
     } catch (err: unknown) {
@@ -113,12 +113,12 @@ export function StakePosition({ position, onRefresh }: StakePositionProps) {
         <StatBox
           label="Staked"
           value={position.stakedAmount.toLocaleString()}
-          unit="XNT"
+          unit="THEO"
         />
         <StatBox
           label="Claimable Rewards"
           value={position.claimableRewards.toFixed(4)}
-          unit="XNT"
+          unit="THEO"
           accent
         />
       </div>
@@ -180,7 +180,7 @@ export function StakePosition({ position, onRefresh }: StakePositionProps) {
               <span className="spinner" /> Claiming…
             </>
           ) : (
-            `Claim ${position.claimableRewards.toFixed(4)} XNT`
+            `Claim ${position.claimableRewards.toFixed(4)} THEO`
           )}
         </button>
       </div>

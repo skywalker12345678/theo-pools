@@ -77,14 +77,14 @@ export function PoolCard({ pool }: PoolCardProps) {
             paddingTop: 16,
           }}
         >
-          <Stat label="TVL" value={`${(pool.tvl / 1000).toFixed(1)}k`} unit="XNT" />
+          <Stat label="TVL" value={`${(pool.tvl / 1000).toFixed(1)}k`} unit="THEO" />
           <Stat
             label="APR"
             value={`${pool.apr.toFixed(1)}`}
             unit="%"
             highlight
           />
-          <Stat label="Min Stake" value={`${pool.minStake}`} unit="XNT" />
+          <Stat label="Min Stake" value={`${pool.minStake}`} unit="THEO" />
           <Stat label="Players" value={`${pool.playerCount}`} unit="" />
         </div>
 

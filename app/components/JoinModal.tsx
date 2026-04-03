@@ -93,7 +93,7 @@ export function JoinModal({ pool, onClose, onSuccess }: JoinModalProps) {
             <div>
               <h2 style={{ fontSize: 20, fontWeight: 700 }}>Join {pool.name}</h2>
               <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4 }}>
-                Stake XNT to earn rewards
+                Stake THEO to earn rewards
               </p>
             </div>
             <button
@@ -125,9 +125,9 @@ export function JoinModal({ pool, onClose, onSuccess }: JoinModalProps) {
             }}
           >
             <InfoRow label="APR" value={`${pool.apr.toFixed(1)}%`} accent />
-            <InfoRow label="Min Stake" value={`${pool.minStake} XNT`} />
-            <InfoRow label="Max Stake" value={`${pool.maxStake.toLocaleString()} XNT`} />
-            <InfoRow label="TVL" value={`${(pool.tvl / 1000).toFixed(1)}k XNT`} />
+            <InfoRow label="Min Stake" value={`${pool.minStake} THEO`} />
+            <InfoRow label="Max Stake" value={`${pool.maxStake.toLocaleString()} THEO`} />
+            <InfoRow label="TVL" value={`${(pool.tvl / 1000).toFixed(1)}k THEO`} />
           </div>
 
           {/* Amount input */}
@@ -142,7 +142,7 @@ export function JoinModal({ pool, onClose, onSuccess }: JoinModalProps) {
                   marginBottom: 8,
                 }}
               >
-                Stake Amount (XNT)
+                Stake Amount (THEO)
               </label>
               <div style={{ position: "relative", marginBottom: 8 }}>
                 <input
@@ -150,7 +150,7 @@ export function JoinModal({ pool, onClose, onSuccess }: JoinModalProps) {
                   type="number"
                   min={pool.minStake}
                   max={pool.maxStake}
-                  placeholder={`Min ${pool.minStake} XNT`}
+                  placeholder={`Min ${pool.minStake} THEO`}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   style={{ paddingRight: 60 }}
@@ -166,7 +166,7 @@ export function JoinModal({ pool, onClose, onSuccess }: JoinModalProps) {
                     color: "var(--text-muted)",
                   }}
                 >
-                  XNT
+                  THEO
                 </span>
               </div>
 
@@ -188,7 +188,7 @@ export function JoinModal({ pool, onClose, onSuccess }: JoinModalProps) {
                       transition: "all 0.15s",
                     }}
                   >
-                    {v} XNT
+                    {v} THEO
                   </button>
                 ))}
               </div>
@@ -249,7 +249,7 @@ export function JoinModal({ pool, onClose, onSuccess }: JoinModalProps) {
               </h3>
               <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 16 }}>
                 You staked{" "}
-                <strong style={{ color: "var(--accent)" }}>{amount} XNT</strong> in{" "}
+                <strong style={{ color: "var(--accent)" }}>{amount} THEO</strong> in{" "}
                 {pool.name}.
               </p>
               <a
