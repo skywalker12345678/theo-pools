@@ -90,6 +90,7 @@ function mapPoolAccount(account: any, poolId: number): Pool {
     claimDeadline: account.claimDeadline?.toNumber() ?? 0,
     rewardPerSurvivor: (account.rewardPerSurvivor?.toNumber() ?? 0) / DECIMALS,
     stakeMint: THEO_MINT.toBase58(),
+    fillDeadline: account.fillDeadline?.toNumber() ?? 0,
   };
 }
 

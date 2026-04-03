@@ -6,6 +6,7 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { getPoolState, getUserPositions, joinPool, exitPool, claimRewards, withdraw, closeStalledPool, createPool, finalize } from "@/lib/instructions";
 import { JoinModal } from "@/components/JoinModal";
+import { Countdown } from "@/components/Countdown";
 import { Pool, UserPosition } from "@/lib/types";
 import { PROGRAM_ID } from "@/lib/constants";
 
@@ -65,10 +66,10 @@ export default function PoolDetailClient() {
   const hasPosition = !!position;
   const canJoin = pool.status === "Filling" && !hasPosition;
   const canExit = hasPosition && !position?.exitedEarly && !position?.claimed && pool.status === "Active" && !gameEnded;
-  const canClaim = hasPosition && !position?.exitedEarly && !position?.claimed && (pool.status === "Claiming" || claimWindowOpen);
+  const canClaim = hasPosition && !position?.exitedEarly && !position?.claimed && (pool.status === "Claiming" || (pool.status === "Active" && gameEnded));
   const canWithdraw = hasPosition && pool.status === "Filling";
   const canClose = pool.status === "Filling";
-  const canFinalize = claimWindowClosed && !pool.status.includes("Finalized");
+  const canFinalize = claimWindowClosed && pool.status !== "Finalized";
 
   return (
     <div style={{ maxWidth: 820, margin: "0 auto" }}>
@@ -85,14 +86,14 @@ export default function PoolDetailClient() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
               <h1 style={{ fontSize: 28, fontWeight: 800 }}>{pool.name}</h1>
-              <span className={`badge badge-${pool.status === "Active" ? "green" : pool.status === "Filling" ? "yellow" : pool.status === "Claiming" ? "blue" : "gray"}`}>● {pool.status}</span>
+              <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700, background: pool.status === "Active" ? "rgba(46,204,113,0.15)" : pool.status === "Filling" ? "rgba(252,163,17,0.15)" : "rgba(255,255,255,0.05)", color: pool.status === "Active" ? "var(--success)" : pool.status === "Filling" ? "var(--accent)" : "var(--text-muted)", border: `1px solid ${pool.status === "Active" ? "rgba(46,204,113,0.3)" : pool.status === "Filling" ? "rgba(252,163,17,0.3)" : "rgba(255,255,255,0.1)"}` }}>● {pool.status}</span>
             </div>
             <p style={{ color: "var(--text-secondary)", fontSize: 15 }}>{pool.description}</p>
           </div>
         </div>
 
         {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, paddingTop: 24, borderTop: "1px solid var(--border-subtle)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, paddingTop: 24, borderTop: "1px solid var(--border-subtle)", marginBottom: 24 }}>
           {[
             { label: "Players", value: `${pool.playerCount}/5` },
             { label: "Survivors", value: `${pool.survivorCount}` },
@@ -104,6 +105,22 @@ export default function PoolDetailClient() {
               <div style={{ fontSize: 20, fontWeight: 800, color: accent ? "var(--accent)" : "var(--text-primary)" }}>{value}</div>
             </div>
           ))}
+        </div>
+
+        {/* Countdown timer */}
+        <div style={{ paddingTop: 20, borderTop: "1px solid var(--border-subtle)" }}>
+          {pool.status === "Filling" && pool.fillDeadline > 0 && (
+            <Countdown targetTime={pool.fillDeadline} label="Fill Window Closes" />
+          )}
+          {pool.status === "Active" && pool.endTime > 0 && (
+            <Countdown targetTime={pool.endTime} label="Game Ends In" />
+          )}
+          {pool.status === "Claiming" && pool.claimDeadline > 0 && (
+            <Countdown targetTime={pool.claimDeadline} label="Claim Window Closes" />
+          )}
+          {pool.status === "Active" && gameEnded && (
+            <Countdown targetTime={pool.claimDeadline} label="Claim Window Closes" />
+          )}
         </div>
       </div>
 
@@ -129,7 +146,7 @@ export default function PoolDetailClient() {
               </div>
             </div>
           ) : (
-            <p style={{ color: "var(--text-muted)", fontSize: 14 }}>You don't have a position in this pool.</p>
+            <p style={{ color: "var(--text-muted)", fontSize: 14 }}>You don&apos;t have a position in this pool.</p>
           )}
         </div>
       )}
@@ -146,54 +163,38 @@ export default function PoolDetailClient() {
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius)", padding: 24, marginBottom: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Actions</h2>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-
-          {!publicKey && (
-            <button className="btn btn-primary" onClick={() => setVisible(true)}>Connect Wallet</button>
-          )}
-
-          {canJoin && (
-            <button className="btn btn-primary" onClick={() => setShowJoin(true)}>
-              💰 Join Pool (0.20 THEO)
-            </button>
-          )}
-
+          {!publicKey && <button className="btn btn-primary" onClick={() => setVisible(true)}>Connect Wallet</button>}
+          {canJoin && <button className="btn btn-primary" onClick={() => setShowJoin(true)}>💰 Join Pool (0.20 THEO)</button>}
           {canExit && (
             <button className="btn btn-danger" disabled={actionLoading === "exit"} onClick={() => handleAction("exit", () => exitPool(poolId, publicKey!))}>
               {actionLoading === "exit" ? <><span className="spinner" /> Exiting…</> : "⚡ Exit Early (50% back)"}
             </button>
           )}
-
           {canClaim && (
             <button className="btn btn-primary" disabled={actionLoading === "claim"} onClick={() => handleAction("claim", () => claimRewards(poolId, publicKey!))}>
               {actionLoading === "claim" ? <><span className="spinner" /> Claiming…</> : "🏆 Claim Rewards"}
             </button>
           )}
-
           {canWithdraw && (
             <button className="btn btn-secondary" disabled={actionLoading === "withdraw"} onClick={() => handleAction("withdraw", () => withdraw(poolId, publicKey!))}>
               {actionLoading === "withdraw" ? <><span className="spinner" /> Withdrawing…</> : "↩️ Withdraw"}
             </button>
           )}
-
           {canClose && (
             <button className="btn btn-secondary" disabled={actionLoading === "close"} onClick={() => handleAction("close", () => closeStalledPool(poolId, publicKey!))}>
               {actionLoading === "close" ? <><span className="spinner" /> Closing…</> : "🔓 Close Stalled Pool"}
             </button>
           )}
-
           {canFinalize && (
             <button className="btn btn-secondary" disabled={actionLoading === "finalize"} onClick={() => handleAction("finalize", () => finalize(poolId, publicKey!))}>
               {actionLoading === "finalize" ? <><span className="spinner" /> Finalizing…</> : "🏁 Finalize Pool"}
             </button>
           )}
-
-          {/* Always available - create pool */}
           {publicKey && (
             <button className="btn btn-secondary" disabled={actionLoading === "create"} onClick={() => handleAction("create", () => createPool(publicKey!))}>
               {actionLoading === "create" ? <><span className="spinner" /> Creating…</> : "🆕 Create New Pool"}
             </button>
           )}
-
         </div>
       </div>
 
