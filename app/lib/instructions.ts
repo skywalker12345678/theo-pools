@@ -236,3 +236,33 @@ export async function finalize(poolId: string, wallet: PublicKey): Promise<Trans
   }).instruction();
   return makeTx(wallet, ix);
 }
+
+export async function withdraw(poolId: string, wallet: PublicKey): Promise<Transaction> {
+  const program = getReadonlyProgram();
+  const id = Number(poolId);
+  const ix = await (program.methods as any).withdraw().accounts({
+    player: wallet,
+    globalState: PDAs.globalState(),
+    pool: PDAs.pool(id),
+    userPosition: PDAs.position(id, wallet),
+    tokenMint: THEO_MINT,
+    playerTokenAccount: await ata(wallet),
+    poolVault: PDAs.vault(id),
+    rolloverVault: PDAs.rolloverVault(),
+    tokenProgram: TOKEN_2022_PROGRAM_ID,
+    systemProgram: SystemProgram.programId,
+  }).instruction();
+  return makeTx(wallet, ix);
+}
+
+export async function closeStalledPool(poolId: string, wallet: PublicKey): Promise<Transaction> {
+  const program = getReadonlyProgram();
+  const id = Number(poolId);
+  const ix = await (program.methods as any).closeStalledPool().accounts({
+    caller: wallet,
+    globalState: PDAs.globalState(),
+    pool: PDAs.pool(id),
+    systemProgram: SystemProgram.programId,
+  }).instruction();
+  return makeTx(wallet, ix);
+}
