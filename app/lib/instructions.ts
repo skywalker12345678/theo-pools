@@ -15,8 +15,8 @@ export function getConnection(): Connection {
 
 function getReadonlyProgram(): Program {
   const connection = getConnection();
-  const wallet = new Wallet(PublicKey.default as any);
-  const provider = new AnchorProvider(connection, {} as Wallet, { commitment: "confirmed" });
+  
+  const provider = new AnchorProvider(connection, {} as any, { commitment: "confirmed" });
   return new Program(IDL as any, provider);
 }
 
