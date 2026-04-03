@@ -20,7 +20,7 @@ export default function DashboardPage() {
   }, [publicKey]);
   useEffect(() => { fetchPositions(); }, [fetchPositions]);
   const totalStaked = positions.reduce((s, p) => s + p.stakedAmount, 0);
-  const totalRewards = positions.reduce((s, p) => s + p.claimableRewards, 0);
+  const totalRewards = positions.filter(p => !p.claimed && !p.exitedEarly && p.lockupEnds && Math.floor(Date.now()/1000) > p.lockupEnds && Math.floor(Date.now()/1000) < p.lockupEnds + 5*24*60*60).reduce((s, p) => s + p.claimableRewards, 0);
   if (!publicKey) {
     return (
       <div style={{ textAlign: "center", padding: "80px 0" }}>
