@@ -43,7 +43,7 @@ export default function DashboardPage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 32 }}>
         <SummaryCard label="Total Staked" value={`${totalStaked.toLocaleString()}`} unit="THEO" />
         <SummaryCard label="Claimable Rewards" value={totalRewards.toFixed(4)} unit="THEO" accent />
-        <SummaryCard label="Active Pools" value={`${positions.length}`} unit="" />
+        <SummaryCard label="Total Positions" value={`${positions.length}`} unit="" />
       </div>
       {loading ? (
         <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-muted)" }}><div className="spinner" style={{ margin: "0 auto 12px", width: 24, height: 24 }} /><p>Loading positions…</p></div>
