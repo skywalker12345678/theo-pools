@@ -17,3 +17,4 @@ app/out/
 *id.json
 wallet*.json
 *.key
+data/

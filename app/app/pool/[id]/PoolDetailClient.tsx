@@ -67,7 +67,7 @@ export default function PoolDetailClient() {
   const canJoin = pool.status === "Filling" && !hasPosition;
   const canExit = hasPosition && !position?.exitedEarly && !position?.claimed && pool.status === "Active" && !gameEnded;
   const canClaim = hasPosition && !position?.exitedEarly && !position?.claimed && (pool.status === "Claiming" || (pool.status === "Active" && gameEnded));
-  const canWithdraw = hasPosition && pool.status === "Filling";
+  const canWithdraw = hasPosition && (pool.status === "Filling" || pool.status === "Closed");
   const canClose = pool.status === "Filling";
   const canFinalize = claimWindowClosed && pool.status !== "Finalized";
 
