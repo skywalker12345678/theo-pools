@@ -105,8 +105,15 @@ pub fn handler(ctx: Context<FinalizePool>) -> Result<()> {
             .checked_mul(Pool::STAKE_AMOUNT)
             .ok_or(ErrorCode::MathOverflow)?;
 
+        // FIX: Also rollover unclaimed rewards (penalty shares)
+        let unclaimed_rewards = unclaimed_survivor_count
+            .checked_mul(pool.reward_per_survivor)
+            .ok_or(ErrorCode::MathOverflow)?;
+
         rolled_over = pool.redistribution_dust
             .checked_add(unclaimed_stakes)
+            .ok_or(ErrorCode::MathOverflow)?
+            .checked_add(unclaimed_rewards)
             .ok_or(ErrorCode::MathOverflow)?;
     }
 
