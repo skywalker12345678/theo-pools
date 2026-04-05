@@ -4,6 +4,7 @@ A conviction staking game on X1. Stake THEO tokens, survive the full duration, a
 
 🧪 Testnet live now — Mainnet coming soon
 👉 https://theo-pools.vercel.app
+💬 Telegram: https://t.me/THEOthGreat
 
 ## How It Works
 
