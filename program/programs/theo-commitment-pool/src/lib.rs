@@ -13,6 +13,7 @@ use instructions::claim::*;
 use instructions::finalize::*;
 use instructions::collect_redistribution::*;
 use instructions::close_stalled_pool::*;
+use instructions::sweep_empty_vault::*;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PROGRAM ID
@@ -89,5 +90,9 @@ pub mod theo_commitment_pool {
 
     pub fn close_stalled_pool(ctx: Context<CloseStalledPool>) -> Result<()> {
         instructions::close_stalled_pool::handler(ctx)
+    }
+
+    pub fn sweep_empty_vault(ctx: Context<SweepEmptyVault>) -> Result<()> {
+        instructions::sweep_empty_vault::handler(ctx)
     }
 }
