@@ -57,20 +57,24 @@ pub fn handler(ctx: Context<CloseStalledPool>) -> Result<()> {
         ErrorCode::NotActiveFillingPool
     );
 
-    // ── Guard 3: Fill timer must have expired ─────────────────────────────────
-    require!(
-        pool.fill_timer_expired(now),
-        ErrorCode::FillTimerNotExpired
-    );
-
-    // ── Guard 4: Pool must still have players ─────────────────────────────────
+    // ── Guard 3 & 4: Fill timer expired OR pool is empty (never joined) ─────────
     //
-    // If player_count is already 0, withdraw.rs already auto-closed the pool.
-    // This instruction is only needed when players remain but timer expired.
-    require!(
-        pool.player_count > 0,
-        ErrorCode::PoolAlreadyEmpty
-    );
+    // If no player ever joined (player_count == 0 and fill_deadline == 0),
+    // allow closing immediately — the pool is stuck with a rollover seed
+    // and no way to naturally expire.
+    // Otherwise, require the fill timer to have expired.
+    if pool.player_count == 0 && pool.fill_deadline == 0 {
+        // Pool was never joined — close immediately
+    } else {
+        require!(
+            pool.fill_timer_expired(now),
+            ErrorCode::FillTimerNotExpired
+        );
+        require!(
+            pool.player_count > 0,
+            ErrorCode::PoolAlreadyEmpty
+        );
+    }
 
     // ── Step 1: Close the pool ────────────────────────────────────────────────
     pool.status = PoolStatus::Closed;
