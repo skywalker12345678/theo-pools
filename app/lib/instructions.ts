@@ -267,3 +267,18 @@ export async function closeStalledPool(poolId: string, wallet: PublicKey): Promi
   }).instruction();
   return makeTx(wallet, ix);
 }
+
+export async function sweepEmptyVault(poolId: string, wallet: PublicKey): Promise<Transaction> {
+  const program = getReadonlyProgram();
+  const id = Number(poolId);
+  const ix = await (program.methods as any).sweepEmptyVault().accounts({
+    caller: wallet,
+    globalState: PDAs.globalState(),
+    pool: PDAs.pool(id),
+    tokenMint: THEO_MINT,
+    poolVault: PDAs.vault(id),
+    rolloverVault: PDAs.rolloverVault(),
+    tokenProgram: TOKEN_2022_PROGRAM_ID,
+  }).instruction();
+  return makeTx(wallet, ix);
+}

@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { getPoolState, getUserPositions, joinPool, exitPool, claimRewards, withdraw, closeStalledPool, createPool, finalize } from "@/lib/instructions";
+import { getPoolState, getUserPositions, joinPool, exitPool, claimRewards, withdraw, closeStalledPool, createPool, finalize, sweepEmptyVault } from "@/lib/instructions";
 import { JoinModal } from "@/components/JoinModal";
 import { Countdown } from "@/components/Countdown";
 import { Pool, UserPosition } from "@/lib/types";
@@ -60,7 +60,6 @@ export default function PoolDetailClient() {
 
   const now = Math.floor(Date.now() / 1000);
   const gameEnded = pool.endTime > 0 && now > pool.endTime;
-  const claimWindowOpen = gameEnded && pool.claimDeadline > 0 && now < pool.claimDeadline;
   const claimWindowClosed = pool.claimDeadline > 0 && now > pool.claimDeadline;
 
   const hasPosition = !!position;
@@ -70,17 +69,16 @@ export default function PoolDetailClient() {
   const canWithdraw = hasPosition && (pool.status === "Filling" || pool.status === "Closed");
   const canClose = pool.status === "Filling";
   const canFinalize = claimWindowClosed && pool.status !== "Finalized";
+  const canSweep = pool.status === "Closed" && pool.playerCount === 0;
 
   return (
     <div style={{ maxWidth: 820, margin: "0 auto" }}>
-      {/* Breadcrumb */}
       <div style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 8 }}>
         <Link href="/" style={{ color: "var(--text-muted)", fontSize: 14 }}>Pools</Link>
         <span style={{ color: "var(--text-muted)" }}>›</span>
         <span style={{ color: "var(--text-secondary)", fontSize: 14 }}>{pool.name}</span>
       </div>
 
-      {/* Pool header */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)", padding: 32, marginBottom: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
           <div>
@@ -92,7 +90,6 @@ export default function PoolDetailClient() {
           </div>
         </div>
 
-        {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, paddingTop: 24, borderTop: "1px solid var(--border-subtle)", marginBottom: 24 }}>
           {[
             { label: "Players", value: `${pool.playerCount}/5` },
@@ -107,24 +104,14 @@ export default function PoolDetailClient() {
           ))}
         </div>
 
-        {/* Countdown timer */}
         <div style={{ paddingTop: 20, borderTop: "1px solid var(--border-subtle)" }}>
-          {pool.status === "Filling" && pool.fillDeadline > 0 && (
-            <Countdown targetTime={pool.fillDeadline} label="Fill Window Closes" />
-          )}
-          {pool.status === "Active" && pool.endTime > 0 && (
-            <Countdown targetTime={pool.endTime} label="Game Ends In" />
-          )}
-          {pool.status === "Claiming" && pool.claimDeadline > 0 && (
-            <Countdown targetTime={pool.claimDeadline} label="Claim Window Closes" />
-          )}
-          {pool.status === "Active" && gameEnded && (
-            <Countdown targetTime={pool.claimDeadline} label="Claim Window Closes" />
-          )}
+          {pool.status === "Filling" && pool.fillDeadline > 0 && <Countdown targetTime={pool.fillDeadline} label="Fill Window Closes" />}
+          {pool.status === "Active" && pool.endTime > 0 && !gameEnded && <Countdown targetTime={pool.endTime} label="Game Ends In" />}
+          {(pool.status === "Claiming" || (pool.status === "Active" && gameEnded)) && pool.claimDeadline > 0 && <Countdown targetTime={pool.claimDeadline} label="Claim Window Closes" />}
+          {pool.status === "Filling" && pool.fillDeadline === 0 && <div style={{ fontSize: 13, color: "var(--text-muted)" }}>⏳ Waiting for first player to start fill timer…</div>}
         </div>
       </div>
 
-      {/* Your Position */}
       {publicKey && (
         <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius)", padding: 24, marginBottom: 24 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Your Position</h2>
@@ -142,7 +129,7 @@ export default function PoolDetailClient() {
               </div>
               <div style={{ padding: 12, background: "var(--bg-secondary)", borderRadius: "var(--radius-sm)" }}>
                 <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 4 }}>Claimable</div>
-                <div style={{ fontWeight: 700, color: "var(--accent)" }}>{position?.claimableRewards.toFixed(4)} THEO</div>
+                <div style={{ fontWeight: 700, color: "var(--accent)" }}>{position?.claimableRewards > 0 ? `${position.claimableRewards.toFixed(4)} THEO` : "Calculated on claim"}</div>
               </div>
             </div>
           ) : (
@@ -151,7 +138,6 @@ export default function PoolDetailClient() {
         </div>
       )}
 
-      {/* Message */}
       {message && (
         <div style={{ padding: "12px 16px", borderRadius: "var(--radius-sm)", marginBottom: 16, background: message.type === "success" ? "rgba(46,204,113,0.1)" : "rgba(231,76,60,0.1)", border: `1px solid ${message.type === "success" ? "rgba(46,204,113,0.3)" : "rgba(231,76,60,0.3)"}`, color: message.type === "success" ? "var(--success)" : "var(--danger)" }}>
           {message.text}
@@ -159,7 +145,6 @@ export default function PoolDetailClient() {
         </div>
       )}
 
-      {/* Actions */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius)", padding: 24, marginBottom: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Actions</h2>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
@@ -190,6 +175,11 @@ export default function PoolDetailClient() {
               {actionLoading === "finalize" ? <><span className="spinner" /> Finalizing…</> : "🏁 Finalize Pool"}
             </button>
           )}
+          {canSweep && (
+            <button className="btn btn-secondary" disabled={actionLoading === "sweep"} onClick={() => handleAction("sweep", () => sweepEmptyVault(poolId, publicKey!))}>
+              {actionLoading === "sweep" ? <><span className="spinner" /> Sweeping…</> : "🧹 Recover Stuck THEO"}
+            </button>
+          )}
           {publicKey && (
             <button className="btn btn-secondary" disabled={actionLoading === "create"} onClick={() => handleAction("create", () => createPool(publicKey!))}>
               {actionLoading === "create" ? <><span className="spinner" /> Creating…</> : "🆕 Create New Pool"}
@@ -198,7 +188,6 @@ export default function PoolDetailClient() {
         </div>
       </div>
 
-      {/* On-chain details */}
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius)", padding: 24, marginBottom: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>On-Chain Details</h2>
         <div style={{ display: "grid", gap: 10 }}>
